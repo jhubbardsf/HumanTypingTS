@@ -4,6 +4,12 @@ TypeScript port of the Python HumanTyping library. It simulates human-like typin
 
 The package is Bun-managed and Playwright-first, while the core `MarkovTyper` can be used without Playwright.
 
+## See It In Action
+
+![HumanTypingTS typing demo](assets/humantypingts-demo.gif)
+
+This GIF is generated from a real Playwright run using this TypeScript package. The generator picks a deterministic seed that shows a visible typo and correction without changing the library's default error rates. Regenerate it with `bun run demo:gif` when `ffmpeg` is available locally.
+
 ## Install
 
 ```bash

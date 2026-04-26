@@ -1,6 +1,6 @@
 {
   "name": "humantyping-ts",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Realistic human typing simulation for TypeScript and Playwright.",
   "type": "module",
   "main": "./dist/index.js",
@@ -14,10 +14,12 @@
   "files": [
     "dist",
     "README.md",
-    "LICENSE"
+    "LICENSE",
+    "assets/humantypingts-demo.gif"
   ],
   "scripts": {
     "build": "tsc -p tsconfig.json",
+    "demo:gif": "bun run scripts/generate-demo-gif.ts",
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "test": "bun test",
     "test:smoke": "PLAYWRIGHT_SMOKE=1 bun test test/playwright-smoke.test.ts"
