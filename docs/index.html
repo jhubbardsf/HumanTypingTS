@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>humantyping-ts - Realistic human typing for Playwright</title>
+    <meta name="description" content="A TypeScript library that simulates human-like typing with timing variance, neighbor-key errors, swaps, backspacing, and fatigue. Built for Playwright.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0a0a0a;
+            --bg-secondary: #141414;
+            --bg-tertiary: #1a1a1a;
+            --text-primary: #fafafa;
+            --text-secondary: #a1a1aa;
+            --text-muted: #71717a;
+            --accent: #f97316;
+            --accent-hover: #fb923c;
+            --border: #27272a;
+            --code-bg: #18181b;
+            --green: #22c55e;
+            --red: #ef4444;
+            --blue: #60a5fa;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        /* Hero */
+        .hero {
+            padding: 80px 0 48px;
+            text-align: center;
+        }
+
+        .badge {
+            display: inline-block;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 6px 14px;
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-bottom: 24px;
+        }
+
+        .badge code {
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--accent);
+            font-size: 12px;
+        }
+
+        .hero h1 {
+            font-size: clamp(2.25rem, 5vw, 3.5rem);
+            font-weight: 700;
+            margin-bottom: 16px;
+            letter-spacing: -0.02em;
+        }
+
+        .hero h1 span {
+            color: var(--accent);
+        }
+
+        .hero .tagline {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            max-width: 640px;
+            margin: 0 auto 32px;
+        }
+
+        /* Install Box */
+        .install-tabs {
+            display: flex;
+            gap: 4px;
+            justify-content: center;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+        }
+
+        .tab {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            padding: 6px 14px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .tab:hover {
+            color: var(--text-primary);
+            border-color: var(--text-muted);
+        }
+
+        .tab.active {
+            background: var(--bg-secondary);
+            border-color: var(--accent);
+            color: var(--text-primary);
+        }
+
+        .install-box {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 18px 24px;
+            display: inline-flex;
+            align-items: center;
+            gap: 16px;
+            max-width: 560px;
+            width: 100%;
+        }
+
+        .install-box code {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.95rem;
+            color: var(--text-primary);
+            white-space: nowrap;
+            overflow-x: auto;
+            flex: 1;
+            text-align: left;
+        }
+
+        .install-box .prefix {
+            color: var(--text-muted);
+            user-select: none;
+        }
+
+        .copy-btn {
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.2s;
+            white-space: nowrap;
+        }
+
+        .copy-btn:hover {
+            background: var(--accent-hover);
+        }
+
+        .copy-btn.copied {
+            background: var(--green);
+        }
+
+        /* Demo GIF */
+        .demo-gif-section {
+            padding: 24px 0 48px;
+            text-align: center;
+        }
+
+        .demo-frame {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+            max-width: 760px;
+            margin: 0 auto;
+            box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5);
+        }
+
+        .demo-frame-header {
+            background: var(--bg-tertiary);
+            padding: 10px 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .demo-frame-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .demo-frame-dot.red { background: #ef4444; }
+        .demo-frame-dot.yellow { background: #eab308; }
+        .demo-frame-dot.green { background: var(--green); }
+
+        .demo-frame-url {
+            flex: 1;
+            text-align: center;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 4px 10px;
+            margin: 0 60px 0 8px;
+        }
+
+        .demo-frame-body {
+            padding: 6px;
+            background: var(--bg-tertiary);
+        }
+
+        .demo-gif {
+            display: block;
+            width: 100%;
+            border-radius: 8px;
+        }
+
+        .demo-caption {
+            color: var(--text-muted);
+            font-size: 0.875rem;
+            margin-top: 16px;
+        }
+
+        /* Before/After comparison */
+        .comparison {
+            padding: 48px 0;
+            border-top: 1px solid var(--border);
+        }
+
+        .comparison h2 {
+            text-align: center;
+            font-size: 1.5rem;
+            margin-bottom: 12px;
+        }
+
+        .comparison .subhead {
+            text-align: center;
+            color: var(--text-secondary);
+            margin-bottom: 32px;
+            max-width: 640px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .comparison-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+        }
+
+        @media (max-width: 768px) {
+            .comparison-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .comparison-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 24px;
+        }
+
+        .comparison-card.before { border-color: var(--red); }
+        .comparison-card.after { border-color: var(--green); }
+
+        .comparison-card h3 {
+            font-size: 0.875rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 16px;
+        }
+
+        .comparison-card.before h3 { color: var(--red); }
+        .comparison-card.after h3 { color: var(--green); }
+
+        .comparison-card pre {
+            background: var(--code-bg);
+            border-radius: 8px;
+            padding: 16px;
+            overflow-x: auto;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            line-height: 1.7;
+        }
+
+        .comparison-card code {
+            color: var(--text-secondary);
+        }
+
+        .comment { color: var(--text-muted); }
+        .keyword { color: #c084fc; }
+        .string { color: #86efac; }
+        .fn { color: var(--blue); }
+        .num { color: #fbbf24; }
+        .punct { color: var(--text-muted); }
+
+        .typed-line {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+            color: var(--text-primary);
+            background: var(--code-bg);
+            border-radius: 8px;
+            padding: 16px 18px;
+            min-height: 56px;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        .typed-line .caret {
+            display: inline-block;
+            width: 8px;
+            background: var(--accent);
+            color: var(--accent);
+            margin-left: 1px;
+            animation: blink 1s step-end infinite;
+        }
+
+        @keyframes blink {
+            50% { opacity: 0; }
+        }
+
+        .comparison-card .label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        /* Code demo */
+        .code-demo {
+            padding: 48px 0;
+            border-top: 1px solid var(--border);
+        }
+
+        .code-demo h2 {
+            text-align: center;
+            font-size: 1.5rem;
+            margin-bottom: 32px;
+        }
+
+        .code-window {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+            max-width: 760px;
+            margin: 0 auto;
+        }
+
+        .code-header {
+            background: var(--bg-tertiary);
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .code-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .code-dot.red { background: #ef4444; }
+        .code-dot.yellow { background: #eab308; }
+        .code-dot.green { background: var(--green); }
+
+        .code-title {
+            flex: 1;
+            text-align: center;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .code-body {
+            padding: 22px 24px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.875rem;
+            line-height: 1.75;
+            overflow-x: auto;
+            white-space: pre;
+        }
+
+        /* Features */
+        .features {
+            padding: 48px 0;
+            border-top: 1px solid var(--border);
+        }
+
+        .features h2 {
+            text-align: center;
+            font-size: 1.5rem;
+            margin-bottom: 40px;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .feature-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 24px;
+        }
+
+        .feature-icon {
+            font-size: 1.5rem;
+            margin-bottom: 12px;
+        }
+
+        .feature-card h3 {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .feature-card p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        /* CTA */
+        .cta {
+            padding: 56px 0;
+            text-align: center;
+            border-top: 1px solid var(--border);
+        }
+
+        .cta h2 {
+            font-size: 1.5rem;
+            margin-bottom: 24px;
+        }
+
+        .cta-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-family: 'Inter', sans-serif;
+            font-size: 1rem;
+            font-weight: 500;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--accent-hover);
+        }
+
+        .btn-secondary {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--text-muted);
+        }
+
+        /* Footer */
+        footer {
+            padding: 40px 0;
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.875rem;
+            border-top: 1px solid var(--border);
+        }
+
+        footer a {
+            color: var(--accent);
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Hero -->
+        <section class="hero">
+            <div class="badge">TypeScript <code>&middot;</code> Playwright <code>&middot;</code> Bun</div>
+            <h1>Type like a <span>human</span>, not a bot.</h1>
+            <p class="tagline">
+                Realistic human typing simulation for TypeScript and Playwright.
+                Variable timing, neighbor-key errors, swaps, backspacing, fatigue, and bigram speedups.
+            </p>
+            <div class="install-tabs">
+                <button class="tab active" data-cmd="bun add humantyping-ts">bun</button>
+                <button class="tab" data-cmd="npm install humantyping-ts">npm</button>
+                <button class="tab" data-cmd="pnpm add humantyping-ts">pnpm</button>
+                <button class="tab" data-cmd="yarn add humantyping-ts">yarn</button>
+            </div>
+            <div class="install-box">
+                <code><span class="prefix">$ </span><span id="install-cmd">bun add humantyping-ts</span></code>
+                <button class="copy-btn" onclick="copyInstall(this)">Copy</button>
+            </div>
+        </section>
+
+        <!-- Demo GIF -->
+        <section class="demo-gif-section">
+            <div class="demo-frame">
+                <div class="demo-frame-header">
+                    <div class="demo-frame-dot red"></div>
+                    <div class="demo-frame-dot yellow"></div>
+                    <div class="demo-frame-dot green"></div>
+                    <div class="demo-frame-url">localhost:5173 &mdash; Playwright</div>
+                </div>
+                <div class="demo-frame-body">
+                    <img src="assets/humantypingts-demo.gif" alt="HumanTypingTS typing demo" class="demo-gif">
+                </div>
+            </div>
+            <p class="demo-caption">Real output from the library &mdash; pauses, typos, corrections, and all.</p>
+        </section>
+
+        <!-- Before/After -->
+        <section class="comparison">
+            <h2>The bot test you've been failing</h2>
+            <p class="subhead">
+                Default <code>page.fill()</code> dumps the entire string in one frame. Real keyboards don't do that.
+            </p>
+            <div class="comparison-grid">
+                <div class="comparison-card before">
+                    <h3>Before: Instant string dump</h3>
+                    <div class="label">// page.fill(input, "Hello world")</div>
+                    <div class="typed-line">Hello world<span class="caret">&nbsp;</span></div>
+                    <pre style="margin-top: 16px;"><code><span class="comment">// One frame, no variance, no errors.</span>
+<span class="comment">// Cloudflare, reCAPTCHA, and</span>
+<span class="comment">// behavioral fingerprinters notice.</span></code></pre>
+                </div>
+                <div class="comparison-card after">
+                    <h3>After: Realistic keystrokes</h3>
+                    <div class="label">// await typer.type(input, "Hello world")</div>
+                    <div class="typed-line" id="live-demo">Hello world<span class="caret">&nbsp;</span></div>
+                    <pre style="margin-top: 16px;"><code><span class="comment">// Per-key delays from a Markov model,</span>
+<span class="comment">// occasional typos with backspace</span>
+<span class="comment">// corrections, and bigram speedups.</span></code></pre>
+                </div>
+            </div>
+        </section>
+
+        <!-- Code Demo -->
+        <section class="code-demo">
+            <h2>Drop it into any Playwright script</h2>
+            <div class="code-window">
+                <div class="code-header">
+                    <div class="code-dot red"></div>
+                    <div class="code-dot yellow"></div>
+                    <div class="code-dot green"></div>
+                    <span class="code-title">type-realistically.ts</span>
+                </div>
+                <div class="code-body"><span class="keyword">import</span> <span class="punct">{</span> chromium <span class="punct">}</span> <span class="keyword">from</span> <span class="string">"playwright"</span><span class="punct">;</span>
+<span class="keyword">import</span> <span class="punct">{</span> <span class="fn">HumanTyper</span> <span class="punct">}</span> <span class="keyword">from</span> <span class="string">"humantyping-ts"</span><span class="punct">;</span>
+
+<span class="keyword">const</span> browser <span class="punct">=</span> <span class="keyword">await</span> chromium<span class="punct">.</span><span class="fn">launch</span><span class="punct">({</span> headless<span class="punct">:</span> <span class="keyword">false</span> <span class="punct">});</span>
+<span class="keyword">const</span> page <span class="punct">=</span> <span class="keyword">await</span> browser<span class="punct">.</span><span class="fn">newPage</span><span class="punct">();</span>
+<span class="keyword">await</span> page<span class="punct">.</span><span class="fn">goto</span><span class="punct">(</span><span class="string">"https://example.com"</span><span class="punct">);</span>
+
+<span class="keyword">const</span> typer <span class="punct">=</span> <span class="keyword">new</span> <span class="fn">HumanTyper</span><span class="punct">({</span> wpm<span class="punct">:</span> <span class="num">70</span><span class="punct">,</span> layout<span class="punct">:</span> <span class="string">"qwerty"</span> <span class="punct">});</span>
+<span class="keyword">await</span> typer<span class="punct">.</span><span class="fn">type</span><span class="punct">(</span>page<span class="punct">.</span><span class="fn">locator</span><span class="punct">(</span><span class="string">"input[name='q']"</span><span class="punct">),</span> <span class="string">"realistic typing!"</span><span class="punct">);</span>
+</div>
+            </div>
+        </section>
+
+        <!-- Features -->
+        <section class="features">
+            <h2>What makes it feel human</h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">&#9201;</div>
+                    <h3>Markov-chain timing</h3>
+                    <p>Per-keystroke delays sampled from a normal distribution around your target WPM, with std deviation that compounds realistically.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">&#127902;</div>
+                    <h3>Neighbor-key errors</h3>
+                    <p>Mistypes are biased toward physically adjacent keys on QWERTY/AZERTY/Dvorak. Some get noticed and corrected with backspace, others don't.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">&#128587;</div>
+                    <h3>Word difficulty</h3>
+                    <p>Common bigrams speed up. Complex words and composed accents slow down. The model gets <em>tired</em> over long passages.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">&#128640;</div>
+                    <h3>Playwright-first</h3>
+                    <p>Works with locators, element handles, or any object exposing a Playwright-compatible <code>keyboard</code> interface.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">&#129518;</div>
+                    <h3>Headless simulation</h3>
+                    <p>Use <code>MarkovTyper</code> + <code>runMonteCarlo</code> to simulate timings without a browser. Useful for tests and analytics.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">&#128230;</div>
+                    <h3>Zero runtime deps</h3>
+                    <p>Playwright is an optional peer dependency. Pure-simulation users pay nothing for browser machinery.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- CTA -->
+        <section class="cta">
+            <h2>Ship typing your bot detector won't catch</h2>
+            <div class="cta-buttons">
+                <a href="https://github.com/jhubbardsf/HumanTypingTS" class="btn btn-primary">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
+                    </svg>
+                    View on GitHub
+                </a>
+                <a href="https://www.npmjs.com/package/humantyping-ts" class="btn btn-secondary">
+                    View on npm
+                </a>
+            </div>
+        </section>
+    </div>
+
+    <footer>
+        <div class="container">
+            Made by <a href="https://github.com/jhubbardsf">@jhubbardsf</a>
+            &nbsp;&middot;&nbsp; MIT License
+            &nbsp;&middot;&nbsp; Pairs well with
+            <a href="https://github.com/jhubbardsf/aws-sso-refresh">aws-sso-refresh</a>
+            and
+            <a href="https://github.com/jhubbardsf/sopsx">sopsx</a>
+        </div>
+    </footer>
+
+    <script>
+        // Tab switching for install command
+        const tabs = document.querySelectorAll('.tab');
+        const installCmd = document.getElementById('install-cmd');
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                tabs.forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                installCmd.textContent = tab.dataset.cmd;
+            });
+        });
+
+        function copyInstall(btn) {
+            const cmd = installCmd.textContent;
+            navigator.clipboard.writeText(cmd).then(() => {
+                btn.textContent = 'Copied!';
+                btn.classList.add('copied');
+                setTimeout(() => {
+                    btn.textContent = 'Copy';
+                    btn.classList.remove('copied');
+                }, 2000);
+            });
+        }
+
+        // Live "human typing" demo - retypes the phrase with errors and corrections
+        const liveDemo = document.getElementById('live-demo');
+        const targetText = 'Hello world';
+        // Scripted sequence: each entry is [text, delayMs]. Includes a typo + backspace correction.
+        const sequence = [
+            ['', 600],
+            ['H', 180],
+            ['He', 95],
+            ['Hel', 130],
+            ['Hell', 80],
+            ['Hello', 150],
+            ['Hello ', 240],
+            ['Hello w', 180],
+            ['Hello wo', 110],
+            ['Hello wo' , 90],
+            ['Hello wor', 120],
+            ['Hello worl', 95],
+            ['Hello worls', 200],
+            ['Hello worl', 180],
+            ['Hello world', 220],
+            ['Hello world', 1400],
+        ];
+
+        function playSequence() {
+            let i = 0;
+            function step() {
+                if (i >= sequence.length) {
+                    setTimeout(playSequence, 800);
+                    return;
+                }
+                const [text, delay] = sequence[i];
+                liveDemo.innerHTML = escapeHtml(text) + '<span class="caret">&nbsp;</span>';
+                i++;
+                setTimeout(step, delay);
+            }
+            step();
+        }
+
+        function escapeHtml(s) {
+            return s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+        }
+
+        playSequence();
+    </script>
+</body>
+</html>

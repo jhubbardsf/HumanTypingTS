@@ -1,8 +1,12 @@
 # HumanTypingTS
 
+[![npm version](https://img.shields.io/npm/v/humantyping-ts.svg?color=f97316)](https://www.npmjs.com/package/humantyping-ts)
+[![npm downloads](https://img.shields.io/npm/dm/humantyping-ts.svg?color=f97316)](https://www.npmjs.com/package/humantyping-ts)
+[![license](https://img.shields.io/npm/l/humantyping-ts.svg)](./LICENSE)
+
 TypeScript port of the Python HumanTyping library. It simulates human-like typing with variable timing, keyboard-neighbor errors, swap errors, delayed correction, backspacing, word difficulty, bigram speedups, accents, and fatigue.
 
-The package is Bun-managed and Playwright-first, while the core `MarkovTyper` can be used without Playwright.
+The package is published as [`humantyping-ts`](https://www.npmjs.com/package/humantyping-ts) and is Playwright-first, while the core `MarkovTyper` can be used without Playwright.
 
 ## See It In Action
 
@@ -11,20 +15,23 @@ The package is Bun-managed and Playwright-first, while the core `MarkovTyper` ca
 ## Install
 
 ```bash
-bun install
+# Bun
+bun add humantyping-ts
+
+# npm
+npm install humantyping-ts
+
+# pnpm
+pnpm add humantyping-ts
+
+# yarn
+yarn add humantyping-ts
 ```
 
-## Build and Test
+If you want browser automation, also install Playwright (it's an optional peer dependency):
 
 ```bash
-bun test
-bun run build
-```
-
-Run the real browser smoke test when Playwright browsers are installed:
-
-```bash
-bun run test:smoke
+bun add -d playwright
 ```
 
 ## Playwright Usage
@@ -66,3 +73,30 @@ console.log(stats.meanTime, stats.standardDeviation);
 - `HumanTyper.type(target, text)` accepts Playwright-like locators, element handles, or pages with a `keyboard`.
 - Playwright is a peer dependency so downstream projects can control the Playwright version.
 - The port aims for behavioral parity with the Python model, not exact random-seed equivalence.
+
+## Local Development
+
+Clone the repo and install dev dependencies with Bun:
+
+```bash
+bun install
+```
+
+Run the unit tests and build the `dist/` output:
+
+```bash
+bun test
+bun run build
+```
+
+Run the real browser smoke test when Playwright browsers are installed:
+
+```bash
+bun run test:smoke
+```
+
+## Links
+
+- npm: https://www.npmjs.com/package/humantyping-ts
+- GitHub: https://github.com/jhubbardsf/HumanTypingTS
+- Demo page: https://jhubbardsf.github.io/HumanTypingTS/
