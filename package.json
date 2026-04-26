@@ -1,12 +1,12 @@
 {
   "name": "humantyping-ts",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "Realistic human typing simulation for TypeScript and Playwright.",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/jhubbardsf/HumanTypingTS.git"
   },
-  "homepage": "https://github.com/jhubbardsf/HumanTypingTS#readme",
+  "homepage": "https://jhubbardsf.github.io/HumanTypingTS/",
   "bugs": {
     "url": "https://github.com/jhubbardsf/HumanTypingTS/issues"
   },
