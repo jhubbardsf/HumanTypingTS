@@ -4,7 +4,7 @@
 [![npm downloads](https://img.shields.io/npm/dm/humantyping-ts.svg?color=f97316)](https://www.npmjs.com/package/humantyping-ts)
 [![license](https://img.shields.io/npm/l/humantyping-ts.svg)](./LICENSE)
 
-TypeScript port of the Python HumanTyping library. It simulates human-like typing with variable timing, keyboard-neighbor errors, swap errors, delayed correction, backspacing, word difficulty, bigram speedups, accents, and fatigue.
+TypeScript port of [HumanTyping](https://github.com/Lax3n/HumanTyping), the Python library by [@Lax3n](https://github.com/Lax3n). Simulates human-like typing with variable timing, keyboard-neighbor errors, swap errors, delayed correction, backspacing, word difficulty, bigram speedups, accents, and fatigue.
 
 The package is published as [`humantyping-ts`](https://www.npmjs.com/package/humantyping-ts) and is Playwright-first, while the core `MarkovTyper` can be used without Playwright.
 
@@ -100,3 +100,4 @@ bun run test:smoke
 - npm: https://www.npmjs.com/package/humantyping-ts
 - GitHub: https://github.com/jhubbardsf/HumanTypingTS
 - Demo page: https://jhubbardsf.github.io/HumanTypingTS/
+- Original Python library: https://github.com/Lax3n/HumanTyping
